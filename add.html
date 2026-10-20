@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add server to PortL</title>
+  <meta name="description" content="Someone shared a Minecraft Bedrock server with you. Open it in PortL to play it on your console.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header><h1>PortL</h1></header>
+
+  <main class="panel" id="server">
+    <p class="muted">Someone shared a server with you</p>
+    <h2 id="name">…</h2>
+    <p id="address"></p>
+    <a class="button green" id="open">Open in PortL</a>
+    <a class="button" id="play">Get PortL on Google Play</a>
+    <p class="muted">PortL lets your console join this server through a LAN game on your phone.</p>
+  </main>
+
+  <main class="panel hidden" id="invalid">
+    <h2>Link not valid</h2>
+    <p>This PortL link is missing the server address or has an invalid port.</p>
+    <a class="button" id="play2">Get PortL on Google Play</a>
+  </main>
+
+  <script>
+    // Keep in sync with com.portl.link (app ID) and ShareLink.kt validation rules.
+    const PACKAGE = "com.portl.link";
+    const MAX_NAME = 48;
+
+    const q = new URLSearchParams(location.search);
+    const host = (q.get("host") || "").trim();
+    const port = Number((q.get("port") || "").trim());
+    let name = (q.get("name") || "").replace(/[\u0000-\u001f\u007f]/g, "").trim() || host;
+    name = name.slice(0, MAX_NAME);
+
+    const valid = host.length > 0 && host.length <= 253 && /^[A-Za-z0-9.\-]+$/.test(host) &&
+      Number.isInteger(port) && port >= 1 && port <= 65535;
+
+    const enc = encodeURIComponent;
+    const query = `name=${enc(name)}&host=${enc(host)}&port=${port}`;
+    // The canonical share link; passed through Play as the install referrer so the app can
+    // offer to add the server on first launch (see Sharing.checkInstallReferrer).
+    const shareLink = `${location.origin}/add?${query}`;
+    const playUrl = `https://play.google.com/store/apps/details?id=${PACKAGE}&referrer=${enc(shareLink)}`;
+
+    document.getElementById("play").href = playUrl;
+    document.getElementById("play2").href = `https://play.google.com/store/apps/details?id=${PACKAGE}`;
+
+    if (valid) {
+      // textContent, never innerHTML: values come from the URL.
+      document.getElementById("name").textContent = name;
+      document.getElementById("address").textContent = `${host}:${port}`;
+      document.getElementById("open").href = `portl://add?${query}`;
+      document.title = `Add ${name} to PortL`;
+    } else {
+      document.getElementById("server").classList.add("hidden");
+      document.getElementById("invalid").classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>

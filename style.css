@@ -1,0 +1,91 @@
+/* PortL share pages - Minecraft-style look, original assets only (Monocraft is SIL OFL, see fonts/). */
+@font-face {
+  font-family: "Monocraft";
+  src: url("fonts/monocraft.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  --panel: #c6c6c6;
+  --panel-light: #ffffff;
+  --panel-dark: #555555;
+  --text: #373737;
+  --dirt: #4a3324;
+  --grass: #6db33f;
+  --grass-dark: #5fa83a;
+  --green: #3c8527;
+  --green-light: #6cc349;
+  --green-dark: #265c18;
+  --stone: #6e6e6e;
+  --stone-light: #aaaaaa;
+  --stone-dark: #454545;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Monocraft", ui-monospace, monospace;
+  color: #fff;
+  /* Same stripy "plastic" texture for the grass strip and the dirt (matches the app's Plastic pack). */
+  background:
+    repeating-linear-gradient(45deg, var(--grass) 0 8px, var(--grass-dark) 8px 16px) top / 100% 72px no-repeat,
+    repeating-linear-gradient(45deg, #5a3f2c 0 8px, var(--dirt) 8px 16px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 16px 32px;
+}
+
+header {
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+h1 {
+  margin: 0;
+  font-size: 34px;
+  text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.8);
+}
+
+.panel {
+  width: 100%;
+  max-width: 440px;
+  margin-top: 28px;
+  padding: 20px;
+  background: var(--panel);
+  color: var(--text);
+  border: 3px solid #000;
+  box-shadow: inset 3px 3px 0 var(--panel-light), inset -3px -3px 0 var(--panel-dark);
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.panel h2 { margin: 0 0 6px; font-size: 22px; overflow-wrap: anywhere; }
+.panel p { margin: 6px 0; line-height: 1.4; overflow-wrap: anywhere; }
+.muted { color: #555; font-size: 14px; }
+
+.button {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 14px;
+  text-align: center;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 17px;
+  color: #fff;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+  background: var(--stone);
+  border: 3px solid #000;
+  box-shadow: inset 3px 3px 0 var(--stone-light), inset -3px -3px 0 var(--stone-dark);
+}
+.button:active, .button:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
+.button.green {
+  background: repeating-linear-gradient(45deg, var(--green) 0 8px, #357a22 8px 16px);
+  box-shadow: inset 3px 3px 0 var(--green-light), inset -3px -3px 0 var(--green-dark);
+}
+
+.hidden { display: none; }
