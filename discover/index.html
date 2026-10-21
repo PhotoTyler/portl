@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discover servers - PortL</title>
+  <meta name="description" content="Find Minecraft Bedrock servers to join from your Xbox or PlayStation with PortL.">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="sky">
+  <div id="sky" aria-hidden="true"><div id="stars"></div><div id="clouds"></div></div>
+  <button id="sun" type="button" tabindex="-1" aria-hidden="true"></button>
+
+  <header class="site">
+    <h1><a href="/">PortL</a></h1>
+    <nav><a href="/discover/" aria-current="page">Discover</a><a href="/my/">My Servers</a></nav>
+  </header>
+
+  <main class="panel wide">
+    <h2>Discover servers</h2>
+    <p class="muted">Servers shared by their owners. Tap one to open it in PortL.</p>
+    <label for="search">Search</label>
+    <input type="search" id="search" placeholder="Name, address or description" autocomplete="off" maxlength="60">
+    <div class="tags" id="tag-filters" aria-label="Filter by tag"></div>
+    <p class="muted" id="status">Loading servers…</p>
+    <div class="cards" id="cards"></div>
+  </main>
+
+  <footer class="site">
+    <p>Not affiliated with Mojang or Microsoft.</p>
+    <p><a href="/my/">List your own server</a></p>
+  </footer>
+
+  <script type="module" src="/js/discover.js"></script>
+  <script src="/js/sky.js"></script>
+</body>
+</html>

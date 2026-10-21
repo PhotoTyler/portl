@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Servers - PortL</title>
+  <meta name="description" content="List your Minecraft Bedrock server so console players can join it with PortL.">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="site">
+    <h1><a href="/">PortL</a></h1>
+    <nav><a href="/discover/">Discover</a><a href="/my/" aria-current="page">My Servers</a></nav>
+  </header>
+
+  <main class="panel" id="loading"><p>Loading…</p></main>
+
+  <main class="panel hidden" id="signed-out">
+    <h2>My Servers</h2>
+    <p>Own a Minecraft Bedrock server? Give it a page with an Open in PortL button and a QR code, and list it in Discover.</p>
+    <button class="button green" type="button" id="sign-in">Sign in with Google</button>
+    <p class="error hidden" id="sign-in-error"></p>
+    <p class="muted">Only for server owners. Players don't need an account to use PortL. Your name and email are never shown on server pages.</p>
+  </main>
+
+  <main class="panel wide hidden" id="signed-in">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">My Servers</h2>
+      <button class="button small" type="button" id="sign-out">Sign out</button>
+    </div>
+    <p class="muted" id="who"></p>
+    <button class="button green" type="button" id="add">Add server</button>
+    <p class="muted" id="list-status"></p>
+    <div class="cards" id="cards"></div>
+  </main>
+
+  <dialog id="edit-dialog">
+    <form id="edit-form" novalidate>
+      <h2 id="edit-title">Add server</h2>
+      <label for="f-name">Name</label>
+      <input type="text" id="f-name" maxlength="48" autocomplete="off" required>
+      <label for="f-host">Address (IP or domain)</label>
+      <input type="text" id="f-host" maxlength="253" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="play.example.com" required>
+      <label for="f-port">Port</label>
+      <input type="number" id="f-port" min="1" max="65535" value="19132" required>
+      <label for="f-desc">Description</label>
+      <textarea id="f-desc" maxlength="300"></textarea>
+      <div class="hint" id="desc-count"></div>
+      <label>Tags (up to 5)</label>
+      <div class="tags" id="f-tags"></div>
+      <label>Visibility</label>
+      <div class="choice" id="f-visibility">
+        <button type="button" data-value="private" aria-pressed="true">Private</button>
+        <button type="button" data-value="public" aria-pressed="false">Public</button>
+      </div>
+      <div class="hint" id="vis-hint"></div>
+      <p class="error hidden" id="edit-error"></p>
+      <div class="row">
+        <button class="button" type="button" id="edit-cancel">Cancel</button>
+        <button class="button green" type="submit" id="edit-save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="delete-dialog">
+    <h2>Delete server?</h2>
+    <p>Are you sure you want to delete <b id="delete-name"></b>? Its page and QR code will stop working.</p>
+    <p class="error hidden" id="delete-error"></p>
+    <div class="row">
+      <button class="button" type="button" id="delete-cancel">Cancel</button>
+      <button class="button red" type="button" id="delete-confirm">Delete</button>
+    </div>
+  </dialog>
+
+  <footer class="site"><p>Not affiliated with Mojang or Microsoft.</p></footer>
+
+  <script type="module" src="/js/my.js"></script>
+</body>
+</html>

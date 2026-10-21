@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Server - PortL</title>
+  <meta name="description" content="A Minecraft Bedrock server you can join from your console with PortL.">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="site">
+    <h1><a href="/">PortL</a></h1>
+    <nav><a href="/discover/">Discover</a><a href="/my/">My Servers</a></nav>
+  </header>
+
+  <main class="panel" id="loading"><p>Loading server…</p></main>
+
+  <main class="panel hidden" id="server">
+    <h2 id="name"></h2>
+    <p id="address"></p>
+    <div class="tags" id="tags"></div>
+    <p class="desc-full" id="description"></p>
+    <a class="button green" id="open">Open in PortL</a>
+    <a class="button" id="play">Get PortL on Google Play</a>
+    <canvas class="qr" id="qr" aria-label="QR code for this server"></canvas>
+    <p class="muted" style="text-align:center">Scan with PortL (or your camera) to add this server.</p>
+    <div class="row">
+      <button class="button small" type="button" id="copy">Copy link</button>
+      <a class="button small" id="save-qr" download="portl-qr.png">Save QR</a>
+      <button class="button small red" type="button" id="report">Report</button>
+    </div>
+    <p class="muted">PortL lets your Xbox or PlayStation join this server through a LAN game on your phone.</p>
+  </main>
+
+  <main class="panel hidden" id="missing">
+    <h2>Server not found</h2>
+    <p>This server may have been removed by its owner.</p>
+    <a class="button" href="/discover/">Discover other servers</a>
+  </main>
+
+  <dialog id="report-dialog">
+    <form id="report-form" method="dialog">
+      <h2>Report server</h2>
+      <p class="muted">Tell us what's wrong. Reports are private and only seen by the PortL team.</p>
+      <label for="reason">Reason</label>
+      <select id="reason" required></select>
+      <label for="details">Details (optional)</label>
+      <textarea id="details" maxlength="300"></textarea>
+      <p class="error hidden" id="report-error"></p>
+      <div class="row">
+        <button class="button" type="button" id="report-cancel">Cancel</button>
+        <button class="button red" type="submit" id="report-send">Send report</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer class="site"><p>Not affiliated with Mojang or Microsoft.</p></footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+  <script type="module" src="/js/server.js"></script>
+</body>
+</html>

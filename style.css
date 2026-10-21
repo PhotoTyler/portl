@@ -89,3 +89,229 @@ h1 {
 }
 
 .hidden { display: none; }
+
+/* ---------- Server listing pages (Discover, server page, My Servers) ---------- */
+
+a { color: inherit; }
+
+header.site {
+  width: 100%;
+  max-width: 900px;
+  justify-content: space-between;
+  gap: 12px;
+}
+header.site h1 a { text-decoration: none; }
+header.site nav { display: flex; gap: 8px; }
+header.site nav a {
+  padding: 8px 10px;
+  font-size: 14px;
+  text-decoration: none;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(0, 0, 0, 0.6);
+}
+header.site nav a[aria-current="page"] { background: rgba(0, 0, 0, 0.6); }
+
+.panel.wide { max-width: 900px; }
+.panel h3 { margin: 16px 0 6px; font-size: 17px; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row > .button { flex: 1 1 160px; width: auto; }
+.button { cursor: pointer; }
+.button.red {
+  background: #a33a2c;
+  box-shadow: inset 3px 3px 0 #d0614f, inset -3px -3px 0 #6b2219;
+}
+.button.small { display: inline-block; width: auto; margin-top: 0; padding: 8px 12px; font-size: 14px; }
+.button:disabled { opacity: 0.6; cursor: default; }
+.error { color: #a01818; font-size: 14px; }
+.ok { color: var(--green-dark); font-size: 14px; }
+
+/* Command-block style text fields, like the app's CommandField. */
+label { display: block; margin: 12px 0 4px; font-size: 14px; }
+input[type="text"], input[type="search"], input[type="number"], textarea, select {
+  width: 100%;
+  padding: 10px;
+  font: inherit;
+  font-size: 15px;
+  color: #fff;
+  background: #000;
+  border: 3px solid #a0a0a0;
+  border-radius: 0;
+  outline: none;
+  caret-color: #fff;
+}
+input:focus, textarea:focus, select:focus { border-color: #fff; }
+textarea { min-height: 90px; resize: vertical; }
+.hint { font-size: 12px; color: #555; margin-top: 3px; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tag {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #fff;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+  background: var(--stone);
+  border: 2px solid #000;
+}
+button.tag { font-family: inherit; cursor: pointer; }
+.tag[aria-pressed="true"] { background: var(--green); box-shadow: inset 2px 2px 0 var(--green-light); }
+
+.choice { display: flex; gap: 0; margin-top: 6px; }
+.choice button {
+  flex: 1;
+  padding: 10px;
+  font: inherit;
+  font-size: 14px;
+  color: #fff;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+  background: var(--stone);
+  border: 3px solid #000;
+  cursor: pointer;
+}
+.choice button + button { border-left: 0; }
+.choice button[aria-pressed="true"] { background: var(--green); }
+
+/* Server cards: stone-grey panel like the app's server card. */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+.card {
+  display: block;
+  padding: 14px;
+  color: var(--text);
+  text-decoration: none;
+  background: var(--panel);
+  border: 3px solid #000;
+  box-shadow: inset 3px 3px 0 var(--panel-light), inset -3px -3px 0 var(--panel-dark);
+  overflow-wrap: anywhere;
+}
+a.card:hover, a.card:focus-visible { outline: 3px solid #fff; outline-offset: 0; }
+.card h3 { margin: 0 0 4px; font-size: 17px; }
+.card .addr { font-size: 13px; color: #555; }
+.card .desc { font-size: 13px; margin: 8px 0 0; line-height: 1.4; white-space: pre-line; }
+.card .actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.badge { font-size: 11px; padding: 2px 6px; border: 2px solid #000; color: #fff; background: #555; }
+.badge.public { background: var(--green); }
+
+.desc-full { white-space: pre-line; }
+.qr { display: block; width: 220px; max-width: 100%; margin: 14px auto 0; image-rendering: pixelated; border: 3px solid #000; }
+
+dialog {
+  width: min(440px, calc(100vw - 32px));
+  padding: 20px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--panel);
+  border: 3px solid #000;
+  box-shadow: inset 3px 3px 0 var(--panel-light), inset -3px -3px 0 var(--panel-dark);
+}
+dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+dialog h2 { margin: 0 0 8px; font-size: 20px; }
+
+.empty { text-align: center; padding: 20px 0; }
+
+footer.site {
+  width: 100%;
+  max-width: 900px;
+  margin-top: auto;
+  padding-top: 28px;
+  text-align: center;
+  font-size: 12px;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+}
+footer.site p { margin: 4px 0; }
+
+/* ---------- Discover: blocky Minecraft sky ---------- */
+/* Sky colours are banded (hard stops) so it looks like stacked blocks rather than a smooth fade. */
+body.sky {
+  --sky: linear-gradient(#5a8dea 0 18%, #6a9cf0 18% 36%, #7aaaf4 36% 54%, #8cb8f7 54% 72%, #a2c6fa 72% 100%);
+  background: var(--sky) fixed;
+  transition: background 0.6s;
+}
+body.sky.sunset {
+  --sky: linear-gradient(#3b2f6e 0 16%, #6a3d7a 16% 32%, #a64b6e 32% 48%, #e0694a 48% 64%, #f79a3e 64% 82%, #fcc85a 82% 100%);
+}
+body.sky.night {
+  --sky: linear-gradient(#05081c 0 25%, #0a1030 25% 50%, #111a44 50% 75%, #182356 75% 100%);
+}
+
+#sky { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; }
+#clouds, #stars { position: absolute; inset: 0; image-rendering: pixelated; }
+#clouds {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='360' shape-rendering='crispEdges' fill='%23fff'%3E%3Crect x='40' y='60' width='96' height='16'/%3E%3Crect x='24' y='76' width='160' height='16'/%3E%3Crect x='56' y='44' width='48' height='16'/%3E%3Crect x='360' y='150' width='128' height='16'/%3E%3Crect x='336' y='166' width='192' height='16'/%3E%3Crect x='392' y='134' width='64' height='16'/%3E%3Crect x='200' y='270' width='80' height='16'/%3E%3Crect x='184' y='286' width='128' height='16'/%3E%3C/svg%3E") repeat-x 0 40px / 640px 360px;
+  opacity: 0.9;
+  animation: drift 120s linear infinite;
+}
+#stars {
+  display: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' shape-rendering='crispEdges' fill='%23fff'%3E%3Crect x='20' y='30' width='4' height='4'/%3E%3Crect x='140' y='70' width='4' height='4'/%3E%3Crect x='250' y='20' width='4' height='4'/%3E%3Crect x='80' y='160' width='4' height='4'/%3E%3Crect x='200' y='200' width='4' height='4'/%3E%3Crect x='30' y='260' width='4' height='4'/%3E%3Crect x='170' y='130' width='2' height='2'/%3E%3Crect x='270' y='120' width='2' height='2'/%3E%3Crect x='110' y='240' width='2' height='2'/%3E%3Crect x='60' y='100' width='2' height='2'/%3E%3C/svg%3E") repeat;
+}
+body.sky.night #stars { display: block; }
+body.sky.night #clouds { opacity: 0.25; }
+body.sky.sunset #clouds { filter: sepia(1) saturate(3) hue-rotate(-30deg); opacity: 0.7; }
+@keyframes drift { to { background-position: 640px 40px; } }
+@media (prefers-reduced-motion: reduce) { #clouds { animation: none; } }
+
+/* The sun/moon: a plain square in the sky. Tapping it is a hidden Easter egg. */
+#sun {
+  position: fixed;
+  top: 80px;
+  right: max(24px, calc(50vw - 430px));
+  z-index: 0;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 0;
+  background: #fff6a8;
+  box-shadow: 0 0 0 8px rgba(255, 246, 168, 0.35);
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
+  transition: top 0.6s, background 0.6s, box-shadow 0.6s;
+}
+body.sky.sunset #sun { top: 94px; background: #ffb347; box-shadow: 0 0 0 10px rgba(255, 140, 50, 0.35); }
+body.sky.night #sun {
+  background:
+    linear-gradient(#bfc4d6, #bfc4d6) 10px 12px / 10px 10px no-repeat,
+    linear-gradient(#bfc4d6, #bfc4d6) 28px 26px / 10px 10px no-repeat,
+    #e8ebf5;
+  box-shadow: 0 0 0 8px rgba(232, 235, 245, 0.15);
+}
+/* Panels sit above the sun so it can only be tapped where the sky shows. */
+body.sky main, body.sky header, body.sky footer { position: relative; z-index: 1; }
+body.sky main.panel, body.sky .panel { z-index: 1; }
+body.sky main { margin-top: 72px; margin-bottom: 40px; }
+body.sky footer.site {
+  margin-top: auto;
+  padding: 24px 16px 16px;
+  width: calc(100% + 32px);
+  max-width: none;
+  margin-bottom: -32px;
+  background:
+    repeating-linear-gradient(45deg, var(--grass) 0 8px, var(--grass-dark) 8px 16px) top / 100% 20px no-repeat,
+    repeating-linear-gradient(45deg, #5a3f2c 0 8px, var(--dirt) 8px 16px);
+}
+body.sky header.site { margin-bottom: 0; }
+
+#egg-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 5;
+  padding: 10px 14px;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 2px solid #000;
+  text-shadow: 2px 2px 0 #000;
+  transition: opacity 0.4s;
+}
+@media (max-width: 480px) {
+  header.site h1 { font-size: 26px; }
+  header.site nav { gap: 6px; }
+  header.site nav a { padding: 6px 7px; font-size: 12px; }
+}
+header.site nav a { white-space: nowrap; }
