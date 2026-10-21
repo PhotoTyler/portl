@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Server - PortL</title>
   <meta name="description" content="A Minecraft Bedrock server you can join from your console with PortL.">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css?v=6">
 </head>
 <body>
   <header class="site">
@@ -13,7 +13,20 @@
     <nav><a href="/discover/">Discover</a><a href="/my/">My Servers</a></nav>
   </header>
 
-  <main class="panel" id="loading"><p>Loading server…</p></main>
+  <main class="panel" id="loading">
+    <p>Loading server…</p>
+    <div class="hidden" id="slow">
+      <p class="muted">This is taking a while. Check your connection, then try again.</p>
+      <button class="button" type="button" onclick="location.reload()">Reload</button>
+    </div>
+  </main>
+  <script>
+    // If the page is still loading after 10 s (slow connection, or a script failed), offer a reload.
+    setTimeout(function () {
+      var l = document.getElementById("loading");
+      if (l && !l.classList.contains("hidden")) document.getElementById("slow").classList.remove("hidden");
+    }, 10000);
+  </script>
 
   <main class="panel hidden" id="server">
     <h2 id="name"></h2>
@@ -75,6 +88,6 @@
   <footer class="site"><p>Not affiliated with Mojang or Microsoft.</p></footer>
 
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
-  <script type="module" src="/js/server.js"></script>
+  <script type="module" src="/js/server.js?v=6"></script>
 </body>
 </html>

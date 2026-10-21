@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Discover servers - PortL</title>
   <meta name="description" content="Find Minecraft Bedrock servers to join from your Xbox or PlayStation with PortL.">
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/style.css?v=6">
 </head>
 <body class="sky">
-  <div id="sky" aria-hidden="true"><div id="stars"></div><div id="clouds"></div></div>
+  <div id="sky" aria-hidden="true"><div id="stars"></div></div>
   <button id="sun" type="button" tabindex="-1" aria-hidden="true"></button>
+  <!-- After the sun so clouds drift in front of it. -->
+  <div id="clouds" aria-hidden="true"></div>
 
   <header class="site">
     <h1><a href="/">PortL</a></h1>
@@ -34,7 +36,7 @@
     <p><a href="/my/">List your own server</a></p>
   </footer>
 
-  <script type="module" src="/js/discover.js"></script>
-  <script src="/js/sky.js"></script>
+  <script type="module" src="/js/discover.js?v=6"></script>
+  <script src="/js/sky.js?v=6"></script>
 </body>
 </html>

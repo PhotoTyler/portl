@@ -367,3 +367,5 @@ header.site nav a { white-space: nowrap; }
 /* Discover sort chips: number = priority, arrow = direction. */
 .sortbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
 .sortbar .tag b { margin-left: 4px; }
+/* Clouds drift in front of the sun/moon but behind the page content (z-index 1). */
+#clouds { position: fixed; z-index: 0; pointer-events: none; }

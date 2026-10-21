@@ -1,11 +1,11 @@
 import {
   addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, serverTimestamp, updateDoc, where,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { db, onUser, signIn, signOutUser } from "./firebase.js";
+import { db, onUser, signIn, signOutUser } from "./firebase.js?v=6";
 import {
   LIMITS, REPORT_REASONS, TAGS, cleanLine, cleanText, clearRecent, el, friendlyError, playersText,
   recentServers, statusBadge, statusKey, statusOf, tagChip, validateServer,
-} from "./common.js";
+} from "./common.js?v=6";
 
 const $ = (id) => document.getElementById(id);
 let user = null;

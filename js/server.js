@@ -1,11 +1,11 @@
 import {
   deleteDoc, doc, getDoc, increment, serverTimestamp, setDoc, writeBatch,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { anyUid, db, googleUser, onUser, signIn } from "./firebase.js";
+import { anyUid, db, googleUser, onUser, signIn } from "./firebase.js?v=6";
 import {
   LIMITS, REPORT_REASONS, appLink, checkedAgo, cleanText, drawQr, el, friendlyError, playStoreLink, playersText,
   rememberViewed, serverPageLink, shareLink, statusBadge, statusKey, statusOf, tagChip,
-} from "./common.js";
+} from "./common.js?v=6";
 
 const $ = (id) => document.getElementById(id);
 const id = new URLSearchParams(location.search).get("id") || "";

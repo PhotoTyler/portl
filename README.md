@@ -38,6 +38,10 @@ This folder is the website for PortL share links:
   **Adds**: `servers/{id}/adds/{uid}` + `addCount`, counted on "Open in PortL" once per browser
   (anonymous sign-in). **Favourites**: `users/{uid}/favorites/{serverId}`, private to the user.
   **Recent**: this browser's localStorage only.
+- **Cache busting:** every page links `style.css?v=N` and `/js/*.js?v=N`, and the JS files import
+  `./firebase.js?v=N` / `./common.js?v=N`. After changing any CSS/JS, bump **N everywhere** (same
+  number in every file, or the shared modules load twice). Otherwise phones keep old cached files
+  and pages can get stuck on "Loading".
 - Limits and the tag list live in both `js/common.js` and `firestore.rules`; keep them in sync.
 - Discover Easter eggs: tap the sun 5 times quickly (day → sunset → night), or type
   `/time set sunset` / `/time set night` / `/time set day` in the search box and press Enter.
