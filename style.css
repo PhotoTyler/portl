@@ -315,3 +315,16 @@ body.sky header.site { margin-bottom: 0; }
   header.site nav a { padding: 6px 7px; font-size: 12px; }
 }
 header.site nav a { white-space: nowrap; }
+/* Shown to owners when the report checker made their server private. */
+.notice {
+  margin: 10px 0 0;
+  padding: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #fff;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+  background: #a33a2c;
+  border: 2px solid #000;
+  box-shadow: inset 2px 2px 0 #d0614f, inset -2px -2px 0 #6b2219;
+}
+.notice p { margin: 4px 0 0; }

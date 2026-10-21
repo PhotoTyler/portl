@@ -1,5 +1,5 @@
-import { addDoc, collection, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { auth, db } from "./firebase.js";
+import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { auth, db, onUser, signIn } from "./firebase.js";
 import {
   LIMITS, REPORT_REASONS, appLink, cleanText, drawQr, el, friendlyError, playStoreLink, serverPageLink,
   shareLink, tagChip,
@@ -7,6 +7,7 @@ import {
 
 const $ = (id) => document.getElementById(id);
 const id = new URLSearchParams(location.search).get("id") || "";
+let ownerUid = null;
 
 function show(section) {
   for (const s of ["loading", "server", "missing"]) $(s).classList.toggle("hidden", s !== section);
@@ -28,6 +29,7 @@ async function load() {
 
 function render(s) {
   const tags = Array.isArray(s.tags) ? s.tags : [];
+  ownerUid = s.ownerUid;
   document.title = `${s.name} - PortL`;
   $("name").textContent = s.name;
   $("address").textContent = `${s.host}:${s.port}`;
@@ -58,23 +60,51 @@ const dialog = $("report-dialog");
 const reason = $("reason");
 for (const [value, label] of Object.entries(REPORT_REASONS)) reason.append(el("option", { value, text: label }));
 
+function reportError(text) {
+  $("report-error").textContent = text;
+  $("report-error").classList.toggle("hidden", !text);
+}
+
+// Reporting needs a Google account, so one person can only report a server once.
+function updateReportDialog() {
+  const user = auth.currentUser;
+  const own = !!user && user.uid === ownerUid;
+  $("report-signin").classList.toggle("hidden", !!user);
+  $("report-fields").classList.toggle("hidden", !user || own);
+  $("report-send").classList.toggle("hidden", !user || own);
+  if (own) reportError("This is your server, so you can't report it.");
+}
+onUser(updateReportDialog);
+
 $("report").addEventListener("click", () => {
-  $("report-error").classList.add("hidden");
+  reportError("");
   $("report-send").disabled = false;
+  updateReportDialog();
   dialog.showModal();
 });
 $("report-cancel").addEventListener("click", () => dialog.close());
+$("report-sign-in").addEventListener("click", async () => {
+  try {
+    await signIn();
+  } catch (err) {
+    console.error(err);
+    reportError(friendlyError(err));
+  }
+});
 
 $("report-form").addEventListener("submit", async (e) => {
   e.preventDefault();
+  const user = auth.currentUser;
+  if (!user || user.uid === ownerUid) return;
   const send = $("report-send");
   send.disabled = true;
   try {
-    await addDoc(collection(db, "reports"), {
+    await setDoc(doc(db, "reports", `${id}_${user.uid}`), {
       serverId: id,
       reason: reason.value,
       details: cleanText($("details").value).slice(0, LIMITS.reportDetails),
-      reporterUid: auth.currentUser ? auth.currentUser.uid : null,
+      reporterUid: user.uid,
+      status: "open",
       createdAt: serverTimestamp(),
     });
     dialog.close();
@@ -83,8 +113,8 @@ $("report-form").addEventListener("submit", async (e) => {
     $("report").disabled = true;
   } catch (err) {
     console.error(err);
-    $("report-error").textContent = friendlyError(err);
-    $("report-error").classList.remove("hidden");
+    // Reports can't be read or overwritten, so a second report from the same account is refused.
+    reportError(err.code === "permission-denied" ? "You've already reported this server. Thanks!" : friendlyError(err));
     send.disabled = false;
   }
 });

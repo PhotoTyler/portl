@@ -41,11 +41,18 @@
   <dialog id="report-dialog">
     <form id="report-form" method="dialog">
       <h2>Report server</h2>
-      <p class="muted">Tell us what's wrong. Reports are private and only seen by the PortL team.</p>
-      <label for="reason">Reason</label>
-      <select id="reason" required></select>
-      <label for="details">Details (optional)</label>
-      <textarea id="details" maxlength="300"></textarea>
+      <div id="report-signin" class="hidden">
+        <p>Please sign in with Google to report a server. This stops one person reporting it lots of times.</p>
+        <p class="muted">Your name and email are never shown to the server owner.</p>
+        <button class="button green" type="button" id="report-sign-in">Sign in with Google</button>
+      </div>
+      <div id="report-fields" class="hidden">
+        <p class="muted">Tell us what's wrong. Reports are private and only seen by the PortL team. You can report each server once.</p>
+        <label for="reason">Reason</label>
+        <select id="reason" required></select>
+        <label for="details">Details (optional)</label>
+        <textarea id="details" maxlength="300"></textarea>
+      </div>
       <p class="error hidden" id="report-error"></p>
       <div class="row">
         <button class="button" type="button" id="report-cancel">Cancel</button>

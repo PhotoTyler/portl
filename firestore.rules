@@ -18,9 +18,11 @@ service cloud.firestore {
                       'addons', 'family-friendly']);
     }
 
+    // 'moderation' is written only by the report checker (GitHub Action, Admin SDK), never by
+    // the website: it says why a server was made private after reports.
     function validServer(d) {
       return d.keys().hasOnly(['ownerUid', 'name', 'host', 'port', 'description', 'tags',
-                               'visibility', 'createdAt', 'updatedAt'])
+                               'visibility', 'createdAt', 'updatedAt', 'moderation'])
         && d.keys().hasAll(['ownerUid', 'name', 'host', 'port', 'description', 'tags',
                             'visibility', 'createdAt', 'updatedAt'])
         && d.name is string && d.name.size() >= 1 && d.name.size() <= 48
@@ -46,30 +48,37 @@ service cloud.firestore {
       allow create: if signedIn()
         && request.resource.data.ownerUid == request.auth.uid
         && request.resource.data.createdAt == request.time
+        && !('moderation' in request.resource.data)
         && validServer(request.resource.data);
 
       allow update: if signedIn()
         && resource.data.ownerUid == request.auth.uid
         && request.resource.data.ownerUid == resource.data.ownerUid
         && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.get('moderation', null) == resource.data.get('moderation', null)
         && validServer(request.resource.data);
 
       allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
     }
 
     match /reports/{reportId} {
-      // Anyone (signed in or not) can file a report about an existing server.
-      // Nobody can read, change or delete reports from the website; review them in the console.
-      allow create: if request.resource.data.keys().hasOnly(['serverId', 'reason', 'details', 'reporterUid', 'createdAt'])
-        && request.resource.data.keys().hasAll(['serverId', 'reason', 'details', 'reporterUid', 'createdAt'])
+      // Signed-in users can report a server they don't own, once: the report ID is
+      // "<serverId>_<uid>", and an existing report can't be overwritten (that would be an update).
+      // Nobody can read, change or delete reports from the website. The report checker
+      // (GitHub Action) counts 'open' reports and marks the ones it acts on.
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['serverId', 'reason', 'details', 'reporterUid', 'createdAt', 'status'])
+        && request.resource.data.keys().hasAll(['serverId', 'reason', 'details', 'reporterUid', 'createdAt', 'status'])
         && request.resource.data.serverId is string
         && request.resource.data.serverId.matches('^[A-Za-z0-9]{1,40}$')
+        && reportId == request.resource.data.serverId + '_' + request.auth.uid
         && exists(/databases/$(database)/documents/servers/$(request.resource.data.serverId))
+        && get(/databases/$(database)/documents/servers/$(request.resource.data.serverId)).data.ownerUid != request.auth.uid
         && request.resource.data.reason in ['broken', 'inappropriate', 'spam', 'impersonation', 'other']
         && request.resource.data.details is string
         && request.resource.data.details.size() <= 300
-        && (request.resource.data.reporterUid == null
-            || (signedIn() && request.resource.data.reporterUid == request.auth.uid))
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.status == 'open'
         && request.resource.data.createdAt == request.time;
       allow read, update, delete: if false;
     }

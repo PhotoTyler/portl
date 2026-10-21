@@ -20,8 +20,15 @@ This folder is the website for PortL share links:
 - Firebase project `portal-servers`, client SDK only (no Cloud Functions/Storage).
 - Firestore `servers/{id}`: `ownerUid, name, host, port, description, tags, visibility, createdAt, updatedAt`.
   Anyone can open a server by ID; lists only return public servers or the signed-in owner's own.
-- Firestore `reports/{id}`: `serverId, reason, details, reporterUid, createdAt`. Create-only from the site;
-  read them in the Firebase console.
+- Firestore `reports/{serverId}_{uid}`: `serverId, reason, details, reporterUid, status, createdAt`.
+  Reporters must sign in with Google; one report per account per server; owners can't report their own.
+  Create-only from the site; read them in the Firebase console.
+- **Report checker** (`.github/workflows/check-reports.yml` + `.github/report-checker/`): every 15 min,
+  a Public server with **3 open reports for the same reason** is made Private, gets a `moderation`
+  notice (shown on My Servers until the owner makes it Public again) and the owner is emailed via
+  Resend. Those reports become `actioned`. Secrets: `FIREBASE_SERVICE_ACCOUNT` (required),
+  `RESEND_API_KEY` + `MAIL_FROM` (email), `ADMIN_EMAIL` (optional copy to you). Without the
+  service account it does nothing.
 - Limits and the tag list live in both `js/common.js` and `firestore.rules`; keep them in sync.
 - Discover Easter eggs: tap the sun 5 times quickly (day → sunset → night), or type
   `/time set sunset` / `/time set night` / `/time set day` in the search box and press Enter.

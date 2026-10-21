@@ -2,7 +2,9 @@ import {
   addDoc, collection, deleteDoc, doc, getDocs, query, serverTimestamp, updateDoc, where,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 import { auth, db, onUser, signIn, signOutUser } from "./firebase.js";
-import { LIMITS, TAGS, cleanLine, cleanText, el, friendlyError, tagChip, validateServer } from "./common.js";
+import {
+  LIMITS, REPORT_REASONS, TAGS, cleanLine, cleanText, el, friendlyError, tagChip, validateServer,
+} from "./common.js";
 
 const $ = (id) => document.getElementById(id);
 let servers = [];
@@ -51,12 +53,30 @@ async function loadServers() {
   }
 }
 
+// Set by the report checker (GitHub Action) when it makes a server private after reports.
+// The notice stays until the owner makes the server public again.
+const hiddenByReports = (s) => s.visibility === "private" && s.moderation && s.moderation.hidden;
+
+function reportNotice(s) {
+  const reason = REPORT_REASONS[s.moderation.reason] || "a problem";
+  return el("div", { class: "notice" },
+    el("b", { text: "Made Private after reports" }),
+    el("p", { text: `This server was reported ${s.moderation.count || 3} times for "${reason}", so it was taken out of Discover. ` +
+      "Please fix the problem, then edit it and set it back to Public." }));
+}
+
 function renderList() {
   $("list-status").textContent = servers.length ? "" : "You haven't added any servers yet.";
+  const flagged = servers.filter(hiddenByReports).length;
+  $("flagged").classList.toggle("hidden", !flagged);
+  $("flagged").textContent = flagged === 1
+    ? "One of your servers was made Private after being reported. See below."
+    : `${flagged} of your servers were made Private after being reported. See below.`;
   $("cards").replaceChildren(...servers.map((s) => el("div", { class: "card" },
     el("div", { class: "row", style: "justify-content:space-between" },
       el("h3", { text: s.name }),
       el("span", { class: `badge ${s.visibility}`, text: s.visibility === "public" ? "Public" : "Private" })),
+    hiddenByReports(s) ? reportNotice(s) : null,
     el("div", { class: "addr", text: `${s.host}:${s.port}` }),
     s.description ? el("p", { class: "desc", text: s.description }) : null,
     s.tags?.length ? el("div", { class: "tags" }, s.tags.map((t) => tagChip(t))) : null,
@@ -85,8 +105,9 @@ const visibility = () => visButtons.find((b) => b.getAttribute("aria-pressed") =
 
 function setVisibility(v) {
   for (const b of visButtons) b.setAttribute("aria-pressed", String(b.dataset.value === v));
+  const flagged = editing && servers.some((s) => s.id === editing && hiddenByReports(s));
   $("vis-hint").textContent = v === "public"
-    ? "Public: anyone can find it in Discover."
+    ? "Public: anyone can find it in Discover." + (flagged ? " Only do this once you've fixed what it was reported for." : "")
     : "Private: only people with the link or QR code can see it.";
 }
 for (const b of visButtons) b.addEventListener("click", () => setVisibility(b.dataset.value));
