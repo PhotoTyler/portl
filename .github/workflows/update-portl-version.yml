@@ -1,0 +1,49 @@
+name: Update PortL version
+
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fetch latest Bedrock version
+        run: |
+          python3 - <<'EOF'
+          import json, re, urllib.request
+          url = "https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/bedrock/common/protocolVersions.json"
+          data = json.load(urllib.request.urlopen(url, timeout=30))
+          releases = [d for d in data
+                      if re.fullmatch(r"\d+(\.\d+)+", str(d.get("minecraftVersion", "")))
+                      and isinstance(d.get("version"), int)]
+          if not releases:
+              raise SystemExit("No valid versions found, not changing anything")
+          latest = max(releases, key=lambda d: d["version"])
+          path = "portl/version.json"
+          with open(path) as f:
+              cfg = json.load(f)
+          cfg["mcVersion"] = latest["minecraftVersion"]
+          cfg["protocol"] = latest["version"]
+          with open(path, "w") as f:
+              json.dump(cfg, f, indent=2)
+              f.write("\n")
+          print("Latest:", cfg["mcVersion"], cfg["protocol"])
+          EOF
+
+      - name: Commit if changed
+        run: |
+          if git diff --quiet; then
+            echo "No change"
+          else
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git commit -am "Update PortL to Bedrock $(jq -r .mcVersion portl/version.json)"
+            git push
+          fi
