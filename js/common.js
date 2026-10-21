@@ -21,6 +21,70 @@ export const REPORT_REASONS = {
   other: "Something else",
 };
 
+// Same colours/labels as the app (Online green, Asleep orange, Offline red, Unknown grey).
+export const STATES = {
+  online: { label: "Online", rank: 3 },
+  asleep: { label: "Asleep", rank: 2 },
+  unknown: { label: "Unknown", rank: 1 },
+  offline: { label: "Offline", rank: 0 },
+};
+
+// meta/status is keyed by a hash of the server ID so private server IDs aren't exposed.
+// Keep in sync with statusKey() in .github/report-checker/check-status.mjs.
+export async function statusKey(id) {
+  const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(id)));
+  return [...bytes].map((b) => b.toString(16).padStart(2, "0")).join("").slice(0, 20);
+}
+
+// Status from meta/status for one server; "unknown" until the checker has seen it.
+export function statusOf(statusDoc, key) {
+  const s = statusDoc && statusDoc.servers && statusDoc.servers[key];
+  return s && STATES[s.s] ? s : { s: "unknown" };
+}
+
+export function playersText(st) {
+  if (st.s !== "online" || st.p == null) return "- players";
+  return st.m ? `${st.p} / ${st.m} players` : `${st.p} players`;
+}
+
+export function statusBadge(st) {
+  return el("span", { class: `status ${st.s}` }, el("i", { "aria-hidden": "true" }), STATES[st.s].label);
+}
+
+export function checkedAgo(statusDoc) {
+  const t = statusDoc && statusDoc.checkedAt && statusDoc.checkedAt.toMillis ? statusDoc.checkedAt.toMillis() : 0;
+  if (!t) return "";
+  const min = Math.max(0, Math.round((Date.now() - t) / 60000));
+  return min < 1 ? "Checked just now" : `Checked ${min} min ago`;
+}
+
+// ---- Recently viewed (this browser only) ----
+const RECENT_KEY = "portl-recent";
+const RECENT_MAX = 20;
+
+export function recentServers() {
+  try {
+    const list = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+export function rememberViewed(id, s) {
+  try {
+    const list = recentServers().filter((r) => r.id !== id);
+    list.unshift({ id, name: s.name, host: s.host, port: s.port, viewedAt: Date.now() });
+    localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, RECENT_MAX)));
+  } catch {
+    // Storage blocked: nothing to remember.
+  }
+}
+
+export function clearRecent() {
+  try { localStorage.removeItem(RECENT_KEY); } catch { /* ignore */ }
+}
+
 const CONTROL_CHARS = /[\u0000-\u001f\u007f]/g;
 
 export function cleanLine(s) {

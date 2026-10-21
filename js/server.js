@@ -1,13 +1,17 @@
-import { doc, getDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { auth, db, onUser, signIn } from "./firebase.js";
 import {
-  LIMITS, REPORT_REASONS, appLink, cleanText, drawQr, el, friendlyError, playStoreLink, serverPageLink,
-  shareLink, tagChip,
+  deleteDoc, doc, getDoc, increment, serverTimestamp, setDoc, writeBatch,
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { anyUid, db, googleUser, onUser, signIn } from "./firebase.js";
+import {
+  LIMITS, REPORT_REASONS, appLink, checkedAgo, cleanText, drawQr, el, friendlyError, playStoreLink, playersText,
+  rememberViewed, serverPageLink, shareLink, statusBadge, statusKey, statusOf, tagChip,
 } from "./common.js";
 
 const $ = (id) => document.getElementById(id);
 const id = new URLSearchParams(location.search).get("id") || "";
-let ownerUid = null;
+let server = null;
+let liked = false;
+let favourite = false;
 
 function show(section) {
   for (const s of ["loading", "server", "missing"]) $(s).classList.toggle("hidden", s !== section);
@@ -19,7 +23,11 @@ async function load() {
   try {
     const snap = await getDoc(doc(db, "servers", id));
     if (!snap.exists()) return show("missing");
-    render(snap.data());
+    server = snap.data();
+    render();
+    rememberViewed(id, server);
+    loadStatus();
+    refreshMine();
   } catch (e) {
     console.error(e);
     show("missing");
@@ -27,9 +35,9 @@ async function load() {
   }
 }
 
-function render(s) {
+function render() {
+  const s = server;
   const tags = Array.isArray(s.tags) ? s.tags : [];
-  ownerUid = s.ownerUid;
   document.title = `${s.name} - PortL`;
   $("name").textContent = s.name;
   $("address").textContent = `${s.host}:${s.port}`;
@@ -37,6 +45,7 @@ function render(s) {
   $("description").textContent = s.description || "";
   $("open").href = appLink(s);
   $("play").href = playStoreLink(s);
+  renderCounts();
 
   // The QR holds the normal share link, which PortL's scanner and Android App Links both understand.
   const qr = $("qr");
@@ -55,6 +64,128 @@ function render(s) {
   show("server");
 }
 
+function renderCounts() {
+  const adds = server.addCount || 0;
+  $("like-count").textContent = server.likeCount || 0;
+  $("like").setAttribute("aria-pressed", String(liked));
+  $("fav").setAttribute("aria-pressed", String(favourite));
+  $("fav").textContent = favourite ? "★ Favourited" : "★ Favourite";
+  $("counts").textContent = `Added to PortL ${adds} time${adds === 1 ? "" : "s"}`;
+}
+
+// ---- Status (checked every 15 minutes by the GitHub Action, see check-status.mjs) ----
+async function loadStatus() {
+  let statusDoc = null;
+  try {
+    const snap = await getDoc(doc(db, "meta", "status"));
+    statusDoc = snap.exists() ? snap.data() : null;
+  } catch (e) {
+    console.error(e);
+  }
+  const st = statusOf(statusDoc, await statusKey(id));
+  $("status").replaceChildren(statusBadge(st));
+  $("players").textContent = playersText(st);
+  $("checked").textContent = statusDoc ? checkedAgo(statusDoc) : "Status not checked yet";
+}
+
+// ---- Like / favourite (Google account) ----
+function actionError(text) {
+  $("action-error").textContent = text;
+  $("action-error").classList.toggle("hidden", !text);
+}
+
+async function refreshMine() {
+  const user = googleUser();
+  liked = false;
+  favourite = false;
+  if (user && server) {
+    try {
+      const [l, f] = await Promise.all([
+        getDoc(doc(db, "servers", id, "likes", user.uid)),
+        getDoc(doc(db, "users", user.uid, "favorites", id)),
+      ]);
+      liked = l.exists();
+      favourite = f.exists();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+  if (server) renderCounts();
+}
+onUser(() => refreshMine());
+
+// Signs in first if needed. Returns the Google user, or null if they backed out.
+async function needUser() {
+  if (googleUser()) return googleUser();
+  await signIn();
+  await refreshMine();
+  return googleUser();
+}
+
+$("like").addEventListener("click", async () => {
+  actionError("");
+  const btn = $("like");
+  btn.disabled = true;
+  try {
+    const user = await needUser();
+    if (!user) return;
+    const likeRef = doc(db, "servers", id, "likes", user.uid);
+    const batch = writeBatch(db);
+    if (liked) batch.delete(likeRef);
+    else batch.set(likeRef, { createdAt: serverTimestamp() });
+    batch.update(doc(db, "servers", id), { likeCount: increment(liked ? -1 : 1) });
+    await batch.commit();
+    server.likeCount = (server.likeCount || 0) + (liked ? -1 : 1);
+    liked = !liked;
+    renderCounts();
+  } catch (e) {
+    console.error(e);
+    actionError(friendlyError(e));
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+$("fav").addEventListener("click", async () => {
+  actionError("");
+  const btn = $("fav");
+  btn.disabled = true;
+  try {
+    const user = await needUser();
+    if (!user) return;
+    const favRef = doc(db, "users", user.uid, "favorites", id);
+    if (favourite) await deleteDoc(favRef);
+    else await setDoc(favRef, { createdAt: serverTimestamp() });
+    favourite = !favourite;
+    renderCounts();
+  } catch (e) {
+    console.error(e);
+    actionError(friendlyError(e));
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+// ---- "Open in PortL" count: once per browser/account, never blocks opening the app ----
+$("open").addEventListener("click", () => {
+  countAdd().catch((e) => console.warn("Add count not saved", e));
+});
+
+async function countAdd() {
+  const flag = `portl-added-${id}`;
+  try { if (localStorage.getItem(flag)) return; } catch { /* storage blocked */ }
+  const uid = await anyUid();
+  const addRef = doc(db, "servers", id, "adds", uid);
+  if ((await getDoc(addRef)).exists()) return;
+  const batch = writeBatch(db);
+  batch.set(addRef, { createdAt: serverTimestamp() });
+  batch.update(doc(db, "servers", id), { addCount: increment(1) });
+  await batch.commit();
+  server.addCount = (server.addCount || 0) + 1;
+  renderCounts();
+  try { localStorage.setItem(flag, "1"); } catch { /* ignore */ }
+}
+
 // ---- Report ----
 const dialog = $("report-dialog");
 const reason = $("reason");
@@ -67,8 +198,8 @@ function reportError(text) {
 
 // Reporting needs a Google account, so one person can only report a server once.
 function updateReportDialog() {
-  const user = auth.currentUser;
-  const own = !!user && user.uid === ownerUid;
+  const user = googleUser();
+  const own = !!user && !!server && user.uid === server.ownerUid;
   $("report-signin").classList.toggle("hidden", !!user);
   $("report-fields").classList.toggle("hidden", !user || own);
   $("report-send").classList.toggle("hidden", !user || own);
@@ -94,8 +225,8 @@ $("report-sign-in").addEventListener("click", async () => {
 
 $("report-form").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const user = auth.currentUser;
-  if (!user || user.uid === ownerUid) return;
+  const user = googleUser();
+  if (!user || user.uid === server.ownerUid) return;
   const send = $("report-send");
   send.disabled = true;
   try {

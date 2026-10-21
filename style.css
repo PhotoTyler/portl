@@ -88,7 +88,7 @@ h1 {
   box-shadow: inset 3px 3px 0 var(--green-light), inset -3px -3px 0 var(--green-dark);
 }
 
-.hidden { display: none; }
+.hidden { display: none !important; }
 
 /* ---------- Server listing pages (Discover, server page, My Servers) ---------- */
 
@@ -328,3 +328,42 @@ header.site nav a { white-space: nowrap; }
   box-shadow: inset 2px 2px 0 #d0614f, inset -2px -2px 0 #6b2219;
 }
 .notice p { margin: 4px 0 0; }
+/* Status square + label, same colours as the app's StatusDot. */
+.status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; white-space: nowrap; }
+.status i { width: 12px; height: 12px; border: 2px solid #000; background: #8b8b8b; }
+.status.online i { background: #4caf3a; }
+.status.asleep i { background: #f0a020; }
+.status.offline i { background: #d23c2c; }
+.card .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.stats { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-size: 12px; color: #444; }
+.statline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 8px 0; }
+
+/* Like / favourite toggles on the server page. */
+.toggle[aria-pressed="true"] {
+  background: var(--green);
+  box-shadow: inset 3px 3px 0 var(--green-light), inset -3px -3px 0 var(--green-dark);
+}
+.toggle.fav[aria-pressed="true"] {
+  background: #b88a12;
+  box-shadow: inset 3px 3px 0 #e8c040, inset -3px -3px 0 #6e520a;
+}
+
+/* Tabs (My Servers). */
+.tabs { display: flex; margin: 14px 0 0; }
+.tabs button {
+  flex: 1;
+  padding: 10px 6px;
+  font: inherit;
+  font-size: 14px;
+  color: #fff;
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+  background: var(--stone-dark);
+  border: 3px solid #000;
+  cursor: pointer;
+}
+.tabs button + button { border-left: 0; }
+.tabs button[aria-selected="true"] { background: var(--stone); box-shadow: inset 0 -4px 0 var(--green-light); }
+
+/* Discover sort chips: number = priority, arrow = direction. */
+.sortbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 10px; }
+.sortbar .tag b { margin-left: 4px; }

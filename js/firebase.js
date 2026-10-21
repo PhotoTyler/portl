@@ -2,7 +2,8 @@
 // by the Firestore security rules in /firestore.rules, not by hiding these values.
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import {
-  getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, signOut,
+  getAuth, GoogleAuthProvider, onAuthStateChanged, signInAnonymously, signInWithPopup, signInWithRedirect,
+  signOut,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
@@ -18,8 +19,21 @@ const app = initializeApp({
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
+// Anonymous sign-in is only used behind the scenes (to count "Open in PortL" once per browser),
+// so pages treat an anonymous user as signed out.
+export function googleUser() {
+  const u = auth.currentUser;
+  return u && !u.isAnonymous ? u : null;
+}
+
 export function onUser(callback) {
-  return onAuthStateChanged(auth, callback);
+  return onAuthStateChanged(auth, (u) => callback(u && !u.isAnonymous ? u : null));
+}
+
+// Any user ID: the Google account if signed in, otherwise an anonymous one.
+export async function anyUid() {
+  if (!auth.currentUser) await signInAnonymously(auth);
+  return auth.currentUser.uid;
 }
 
 export async function signIn() {

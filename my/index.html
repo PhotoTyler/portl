@@ -15,24 +15,43 @@
 
   <main class="panel" id="loading"><p>Loading…</p></main>
 
-  <main class="panel hidden" id="signed-out">
-    <h2>My Servers</h2>
-    <p>Own a Minecraft Bedrock server? Give it a page with an Open in PortL button and a QR code, and list it in Discover.</p>
-    <button class="button green" type="button" id="sign-in">Sign in with Google</button>
-    <p class="error hidden" id="sign-in-error"></p>
-    <p class="muted">Only for server owners. Players don't need an account to use PortL. Your name and email are never shown on server pages.</p>
-  </main>
-
-  <main class="panel wide hidden" id="signed-in">
+  <main class="panel wide hidden" id="page">
     <div class="row" style="justify-content:space-between">
       <h2 style="margin:0">My Servers</h2>
-      <button class="button small" type="button" id="sign-out">Sign out</button>
+      <button class="button small hidden" type="button" id="sign-out" style="flex:none">Sign out</button>
     </div>
-    <p class="muted" id="who"></p>
-    <p class="notice hidden" id="flagged" role="alert"></p>
-    <button class="button green" type="button" id="add">Add server</button>
-    <p class="muted" id="list-status"></p>
-    <div class="cards" id="cards"></div>
+    <p class="muted hidden" id="who"></p>
+
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" data-tab="mine" aria-selected="true">My servers</button>
+      <button type="button" role="tab" data-tab="favourites" aria-selected="false">Favourites</button>
+      <button type="button" role="tab" data-tab="recent" aria-selected="false">Recent</button>
+    </div>
+
+    <section class="hidden" id="signed-out">
+      <p id="signed-out-text"></p>
+      <button class="button green" type="button" id="sign-in">Sign in with Google</button>
+      <p class="error hidden" id="sign-in-error"></p>
+      <p class="muted">Players don't need an account to use PortL. Your name and email are never shown on server pages.</p>
+    </section>
+
+    <section class="hidden" id="tab-mine">
+      <p class="notice hidden" id="flagged" role="alert"></p>
+      <button class="button green" type="button" id="add">Add server</button>
+      <p class="muted" id="list-status"></p>
+      <div class="cards" id="cards"></div>
+    </section>
+
+    <section class="hidden" id="tab-favourites">
+      <p class="muted" id="fav-status"></p>
+      <div class="cards" id="fav-cards"></div>
+    </section>
+
+    <section class="hidden" id="tab-recent">
+      <p class="muted" id="recent-status"></p>
+      <div class="cards" id="recent-cards"></div>
+      <button class="button small hidden" type="button" id="clear-recent" style="margin-top:14px">Clear recent</button>
+    </section>
   </main>
 
   <dialog id="edit-dialog">

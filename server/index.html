@@ -18,8 +18,19 @@
   <main class="panel hidden" id="server">
     <h2 id="name"></h2>
     <p id="address"></p>
+    <div class="statline">
+      <span id="status"></span>
+      <span id="players"></span>
+    </div>
+    <p class="muted" id="checked"></p>
     <div class="tags" id="tags"></div>
     <p class="desc-full" id="description"></p>
+    <div class="row">
+      <button class="button small toggle" type="button" id="like" aria-pressed="false">&#9829; Like <span id="like-count">0</span></button>
+      <button class="button small toggle fav" type="button" id="fav" aria-pressed="false">&#9733; Favourite</button>
+    </div>
+    <p class="muted" id="counts"></p>
+    <p class="error hidden" id="action-error"></p>
     <a class="button green" id="open">Open in PortL</a>
     <a class="button" id="play">Get PortL on Google Play</a>
     <canvas class="qr" id="qr" aria-label="QR code for this server"></canvas>

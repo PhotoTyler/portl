@@ -1,7 +1,9 @@
-name: Check server reports
+name: Check servers and reports
 
-# Makes a Public server Private once it has 3 reports for the same reason, and emails the owner.
-# See .github/report-checker/check-reports.mjs for the secrets it needs.
+# Every 15 minutes:
+#  1. Pings every server and writes Online/Asleep/Offline + players to Firestore (meta/status).
+#  2. Makes a Public server Private once it has 3 reports for the same reason, and emails the owner.
+# See .github/report-checker/*.mjs for the secrets they need.
 on:
   schedule:
     - cron: "*/15 * * * *"
@@ -21,6 +23,8 @@ jobs:
     defaults:
       run:
         working-directory: .github/report-checker
+    env:
+      FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
     steps:
       - uses: actions/checkout@v5
 
@@ -31,10 +35,14 @@ jobs:
       - name: Install
         run: npm install --no-audit --no-fund
 
+      - name: Check server status
+        run: node check-status.mjs
+
       - name: Check reports
+        # Still runs if the status check failed.
+        if: ${{ !cancelled() }}
         run: node check-reports.mjs
         env:
-          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           MAIL_FROM: ${{ secrets.MAIL_FROM }}
           ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}

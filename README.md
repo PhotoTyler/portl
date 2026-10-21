@@ -29,6 +29,15 @@ This folder is the website for PortL share links:
   Resend. Those reports become `actioned`. Secrets: `FIREBASE_SERVICE_ACCOUNT` (required),
   `RESEND_API_KEY` + `MAIL_FROM` (email), `ADMIN_EMAIL` (optional copy to you). Without the
   service account it does nothing.
+- **Status checker** (`.github/report-checker/check-status.mjs`, same workflow, every 15 min): pings
+  every server like the app does (Bedrock ping; MineKeep via Java ping with the asleep check) and
+  writes `meta/status` = `{ servers: { <sha256(id) first 20 hex>: { s, p, m } }, checkedAt }`.
+  Hashed keys keep private server IDs secret. Costs one read per server per run, so about
+  300 servers fit in the Spark daily read quota alongside normal traffic.
+- **Likes**: `servers/{id}/likes/{uid}` + `likeCount` (Google account, one per account).
+  **Adds**: `servers/{id}/adds/{uid}` + `addCount`, counted on "Open in PortL" once per browser
+  (anonymous sign-in). **Favourites**: `users/{uid}/favorites/{serverId}`, private to the user.
+  **Recent**: this browser's localStorage only.
 - Limits and the tag list live in both `js/common.js` and `firestore.rules`; keep them in sync.
 - Discover Easter eggs: tap the sun 5 times quickly (day → sunset → night), or type
   `/time set sunset` / `/time set night` / `/time set day` in the search box and press Enter.
