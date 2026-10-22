@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Delete your PortL account</title>
+  <meta name="description" content="How to delete your PortL account and all the data linked to it.">
+  <link rel="stylesheet" href="/style.css?v=9">
+</head>
+<body>
+  <header class="site">
+    <h1><a href="/">PortL</a></h1>
+    <nav><a href="/discover/">Discover</a><a href="/my/">My Servers</a></nav>
+  </header>
+
+  <main class="panel wide">
+    <h2>Delete your PortL account</h2>
+    <p>This page deletes your <strong>PortL</strong> account (the PortL app, <code>com.portl.link</code>, and
+      portl.click) and <strong>all the data linked to it</strong>. It happens straight away and can't be undone.</p>
+
+    <h3>How to delete your account</h3>
+    <ol>
+      <li>In the PortL app, go to <strong>Settings &gt; Account</strong> and <strong>sign out</strong> on every
+        phone (otherwise a phone could sync your servers back).</li>
+      <li>On this page, press <strong>Sign in with Google</strong> and choose the same Google account you use in PortL.</li>
+      <li>Press <strong>Delete my account</strong>, then <strong>Yes, delete everything</strong>.</li>
+    </ol>
+
+    <h3>What gets deleted</h3>
+    <ul>
+      <li>Your <strong>saved servers</strong> (the list synced with the app)</li>
+      <li>Your <strong>favourites</strong> and <strong>likes</strong></li>
+      <li>Every server you <strong>listed</strong> on Discover (public and private)</li>
+      <li><strong>Recently viewed</strong> servers and site settings stored in this browser</li>
+      <li>Your <strong>PortL sign-in account</strong> (your Google account ID, email, name and picture)</li>
+    </ul>
+
+    <h3>What is kept</h3>
+    <ul>
+      <li><strong>Reports</strong> you made about other servers are kept so moderation stays fair. They no longer
+        link to any account. Email us if you want them removed too.</li>
+      <li>"Added to PortL" counts on server pages stay as plain numbers.</li>
+      <li>Servers saved <strong>on your phone</strong> stay on your phone. To remove them, delete them in the app
+        or uninstall PortL.</li>
+    </ul>
+    <p>Nothing else is kept, and there's no waiting period: your data is deleted as soon as you confirm.</p>
+
+    <div id="box" style="margin-top:18px">
+      <p id="status" class="muted">Loading…</p>
+      <button class="button hidden" type="button" id="sign-in">Sign in with Google</button>
+      <button class="button red hidden" type="button" id="delete">Delete my account</button>
+      <div id="confirm" class="hidden">
+        <p><strong>Are you sure?</strong> Everything listed above will be deleted for good.</p>
+        <div class="row">
+          <button class="button red" type="button" id="yes">Yes, delete everything</button>
+          <button class="button" type="button" id="no">Cancel</button>
+        </div>
+      </div>
+      <p id="error" class="error hidden"></p>
+    </div>
+
+    <h3>Can't sign in?</h3>
+    <p>Email <a href="mailto:tuesday-ai@outlook.com?subject=Delete%20my%20PortL%20account">tuesday-ai@outlook.com</a>
+      from the email address of your Google account and ask us to delete your PortL account. We'll delete
+      everything listed above within 30 days and reply to confirm.</p>
+    <p class="muted">See also our <a href="/privacy/">Privacy Policy</a>.</p>
+  </main>
+
+  <footer class="site">
+    <p><a href="/">PortL</a> · <a href="/privacy/">Privacy Policy</a> · <a href="/delete-account/">Delete account</a></p>
+    <p>Not affiliated with Mojang or Microsoft.</p>
+  </footer>
+
+  <script type="module" src="/js/delete-account.js?v=9"></script>
+</body>
+</html>
