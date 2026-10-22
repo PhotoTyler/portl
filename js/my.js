@@ -1,11 +1,11 @@
 import {
   addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { db, onUser, signIn, signOutUser } from "./firebase.js?v=9";
+import { db, onUser, signIn, signOutUser } from "./firebase.js?v=10";
 import {
   LIMITS, REPORT_REASONS, TAGS, appLink, cleanLine, cleanText, clearRecent, el, friendlyError, isValidHost, playersText,
   recentServers, statusBadge, statusKey, statusOf, tagChip, validateServer,
-} from "./common.js?v=9";
+} from "./common.js?v=10";
 
 const $ = (id) => document.getElementById(id);
 let user = null;
@@ -104,6 +104,7 @@ function renderView() {
   $("signed-out-text").textContent = SIGNED_OUT_TEXT[tab] || "";
   for (const t of TABS) $(`tab-${t}`).classList.toggle("hidden", needsSignIn || t !== tab);
   $("sign-out").classList.toggle("hidden", !user);
+  $("delete-account").classList.toggle("hidden", !user);
   $("who").classList.toggle("hidden", !user);
   if (tab === "favourites" && user) loadFavourites();
   if (tab === "saved" && user) renderSaved();

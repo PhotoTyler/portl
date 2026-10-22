@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Servers - PortL</title>
   <meta name="description" content="List your Minecraft Bedrock server so console players can join it with PortL.">
-  <link rel="stylesheet" href="/style.css?v=9">
+  <link rel="stylesheet" href="/style.css?v=10">
 </head>
 <body>
   <header class="site">
@@ -18,7 +18,10 @@
   <main class="panel wide hidden" id="page">
     <div class="row" style="justify-content:space-between">
       <h2 style="margin:0">My Servers</h2>
-      <button class="button small hidden" type="button" id="sign-out" style="flex:none">Sign out</button>
+      <div class="row" style="flex:none">
+        <a class="button small red hidden" href="/delete-account/" id="delete-account">Delete account</a>
+        <button class="button small hidden" type="button" id="sign-out" style="flex:none">Sign out</button>
+      </div>
     </div>
     <p class="muted hidden" id="who"></p>
 
@@ -135,6 +138,6 @@
 
   <footer class="site"><p>Not affiliated with Mojang or Microsoft.</p></footer>
 
-  <script type="module" src="/js/my.js?v=9"></script>
+  <script type="module" src="/js/my.js?v=10"></script>
 </body>
 </html>

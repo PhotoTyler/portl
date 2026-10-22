@@ -4,8 +4,8 @@ import {
 import {
   deleteUser, GoogleAuthProvider, reauthenticateWithPopup,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { db, googleUser, onUser, signIn, signOutUser } from "./firebase.js?v=9";
-import { friendlyError } from "./common.js?v=9";
+import { db, googleUser, onUser, signIn, signOutUser } from "./firebase.js?v=10";
+import { friendlyError } from "./common.js?v=10";
 
 const $ = (id) => document.getElementById(id);
 
