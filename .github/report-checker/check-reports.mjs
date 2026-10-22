@@ -12,6 +12,7 @@
 //   ADMIN_EMAIL               optional; gets a copy of every "server hidden" email
 
 import { cert, initializeApp } from "firebase-admin/app";
+import { serviceAccount } from "./service-account.mjs";
 import { getAuth } from "firebase-admin/auth";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 
@@ -32,7 +33,7 @@ if (!FIREBASE_SERVICE_ACCOUNT) {
   process.exit(0);
 }
 
-initializeApp({ credential: cert(JSON.parse(FIREBASE_SERVICE_ACCOUNT)) });
+initializeApp({ credential: cert(serviceAccount()) });
 const db = getFirestore();
 const auth = getAuth();
 

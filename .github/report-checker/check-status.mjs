@@ -15,6 +15,7 @@ import { createHash, randomBytes } from "node:crypto";
 import dgram from "node:dgram";
 import net from "node:net";
 import { cert, initializeApp } from "firebase-admin/app";
+import { serviceAccount } from "./service-account.mjs";
 import { FieldValue, getFirestore } from "firebase-admin/firestore";
 
 const { FIREBASE_SERVICE_ACCOUNT } = process.env;
@@ -22,7 +23,7 @@ if (!FIREBASE_SERVICE_ACCOUNT) {
   console.warn("FIREBASE_SERVICE_ACCOUNT secret is missing, nothing checked");
   process.exit(0);
 }
-initializeApp({ credential: cert(JSON.parse(FIREBASE_SERVICE_ACCOUNT)) });
+initializeApp({ credential: cert(serviceAccount()) });
 const db = getFirestore();
 
 const ASLEEP_TEXT = /offline|will be started/i;
