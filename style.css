@@ -372,3 +372,7 @@ header.site nav a { white-space: nowrap; }
 @media (max-width: 480px) {
   .tabs button { font-size: 11px; padding: 10px 2px; }
 }
+/* Saved tab: compact star toggle that never gets squeezed by a long name. */
+.card .top h3 { min-width: 0; }
+.button.star { flex: none; min-width: 40px; padding: 4px 8px; font-size: 18px; line-height: 1; }
+.button.star.on { color: #ffd84a; }

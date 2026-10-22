@@ -1,11 +1,11 @@
 import {
   addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { db, onUser, signIn, signOutUser } from "./firebase.js?v=8";
+import { db, onUser, signIn, signOutUser } from "./firebase.js?v=9";
 import {
   LIMITS, REPORT_REASONS, TAGS, appLink, cleanLine, cleanText, clearRecent, el, friendlyError, isValidHost, playersText,
   recentServers, statusBadge, statusKey, statusOf, tagChip, validateServer,
-} from "./common.js?v=8";
+} from "./common.js?v=9";
 
 const $ = (id) => document.getElementById(id);
 let user = null;
@@ -197,9 +197,12 @@ function renderSaved() {
   $("saved-status").textContent = list.length ? "" : "No saved servers yet. Add one here or in the PortL app.";
   $("saved-cards").replaceChildren(...list.map((s) => el("div", { class: "card" },
     el("div", { class: "top" },
-      el("h3", { text: `${s.favourite ? "\u2605 " : ""}${s.name}` }),
-      el("button", { class: "button small", type: "button", text: s.favourite ? "Unstar" : "\u2606 Star",
-        onclick: () => writeSaved(s.id, { ...pick(s), favourite: !s.favourite }) })),
+      el("h3", { text: s.name }),
+      el("button", {
+        class: `button small star${s.favourite ? " on" : ""}`, type: "button", text: s.favourite ? "\u2605" : "\u2606",
+        "aria-pressed": String(!!s.favourite), title: s.favourite ? "Unstar" : "Star", "aria-label": s.favourite ? "Unstar" : "Star",
+        onclick: () => writeSaved(s.id, { ...pick(s), favourite: !s.favourite }),
+      })),
     el("div", { class: "addr", text: `${s.host}:${s.port}` }),
     el("div", { class: "actions" },
       el("a", { class: "button small green", href: appLink(s), text: "Open in PortL" }),
