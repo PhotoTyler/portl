@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Servers - PortL</title>
   <meta name="description" content="List your Minecraft Bedrock server so console players can join it with PortL.">
-  <link rel="stylesheet" href="/style.css?v=7">
+  <link rel="stylesheet" href="/style.css?v=8">
 </head>
 <body>
   <header class="site">
@@ -90,6 +90,22 @@
     </form>
   </dialog>
 
+  <dialog id="publish-dialog">
+    <h2>List on Discover?</h2>
+    <div class="card" id="publish-card">
+      <div class="top"><h3 id="publish-name"></h3><span class="badge public">Public</span></div>
+      <div class="addr" id="publish-addr"></div>
+    </div>
+    <p class="notice">This lists your server <b>publicly</b> in Discover. <b>Anyone</b> can see it, add it to PortL and join it. Only list servers you own or have permission to share.</p>
+    <p class="muted">You can add a description and tags, or make it Private again, any time from My Servers.</p>
+    <p class="error hidden" id="publish-error"></p>
+    <button class="button green" type="button" id="publish-confirm">List publicly</button>
+    <div class="row" style="margin-top:8px">
+      <button class="button" type="button" id="publish-details">Add details first</button>
+      <button class="button" type="button" id="publish-cancel">Cancel</button>
+    </div>
+  </dialog>
+
   <dialog id="saved-dialog">
     <form id="saved-form" novalidate>
       <h2 id="saved-title">Add server</h2>
@@ -119,6 +135,6 @@
 
   <footer class="site"><p>Not affiliated with Mojang or Microsoft.</p></footer>
 
-  <script type="module" src="/js/my.js?v=7"></script>
+  <script type="module" src="/js/my.js?v=8"></script>
 </body>
 </html>

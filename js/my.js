@@ -1,11 +1,11 @@
 import {
   addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { db, onUser, signIn, signOutUser } from "./firebase.js?v=7";
+import { db, onUser, signIn, signOutUser } from "./firebase.js?v=8";
 import {
   LIMITS, REPORT_REASONS, TAGS, appLink, cleanLine, cleanText, clearRecent, el, friendlyError, isValidHost, playersText,
   recentServers, statusBadge, statusKey, statusOf, tagChip, validateServer,
-} from "./common.js?v=7";
+} from "./common.js?v=8";
 
 const $ = (id) => document.getElementById(id);
 let user = null;
@@ -35,13 +35,8 @@ if (pendingAdd) {
   SIGNED_OUT_TEXT.mine = `Sign in with Google to put "${pendingAdd.name || pendingAdd.host}" on Discover.`;
 }
 
-function openPendingAdd() {
-  if (!pendingAdd) return;
-  const p = pendingAdd;
-  pendingAdd = null;
-  history.replaceState(null, "", location.pathname);
-  // Already listed? Edit that one instead of adding a duplicate.
-  const existing = servers.find((s) => s.host === p.host && s.port === p.port);
+// Opens the full editor with the pending server filled in (Public selected).
+function openPendingEditor(p, existing) {
   openEditor(existing || null);
   if (!existing) {
     $("f-name").value = p.name;
@@ -50,6 +45,49 @@ function openPendingAdd() {
   }
   setVisibility("public");
 }
+
+// "Share to Discover": show the server as a card with a public-listing warning; nothing is listed
+// until the owner confirms.
+function openPendingAdd() {
+  if (!pendingAdd) return;
+  const p = pendingAdd;
+  pendingAdd = null;
+  history.replaceState(null, "", location.pathname);
+  const existing = servers.find((s) => s.host === p.host && s.port === p.port);
+  const data = { name: existing ? existing.name : p.name, host: p.host, port: p.port };
+  // Bad data from the link, or a server hidden after reports: use the full editor instead.
+  const invalid = validateServer({ ...data, description: "", tags: [], visibility: "public" });
+  if (invalid || (existing && hiddenByReports(existing))) return openPendingEditor(p, existing);
+
+  $("publish-name").textContent = data.name;
+  $("publish-addr").textContent = `${data.host}:${data.port}`;
+  $("publish-error").classList.add("hidden");
+  $("publish-confirm").disabled = false;
+  $("publish-confirm").onclick = async () => {
+    $("publish-confirm").disabled = true;
+    try {
+      let id;
+      if (existing) {
+        id = existing.id;
+        await updateDoc(doc(db, "servers", id), { visibility: "public", updatedAt: serverTimestamp() });
+      } else {
+        id = (await addDoc(collection(db, "servers"), {
+          ...data, description: "", tags: [], visibility: "public", ownerUid: user.uid,
+          likeCount: 0, addCount: 0, createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+        })).id;
+      }
+      location.href = `/server/?id=${encodeURIComponent(id)}`;
+    } catch (e) {
+      console.error(e);
+      $("publish-error").textContent = friendlyError(e);
+      $("publish-error").classList.remove("hidden");
+      $("publish-confirm").disabled = false;
+    }
+  };
+  $("publish-details").onclick = () => { $("publish-dialog").close(); openPendingEditor(p, existing); };
+  $("publish-dialog").showModal();
+}
+$("publish-cancel").addEventListener("click", () => $("publish-dialog").close());
 
 for (const b of document.querySelectorAll(".tabs button")) {
   b.addEventListener("click", () => {
