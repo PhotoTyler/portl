@@ -1,11 +1,11 @@
 import {
-  addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, serverTimestamp, updateDoc, where,
+  addDoc, collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, query, serverTimestamp, setDoc, updateDoc, where,
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { db, onUser, signIn, signOutUser } from "./firebase.js?v=6";
+import { db, onUser, signIn, signOutUser } from "./firebase.js?v=7";
 import {
-  LIMITS, REPORT_REASONS, TAGS, cleanLine, cleanText, clearRecent, el, friendlyError, playersText,
+  LIMITS, REPORT_REASONS, TAGS, appLink, cleanLine, cleanText, clearRecent, el, friendlyError, isValidHost, playersText,
   recentServers, statusBadge, statusKey, statusOf, tagChip, validateServer,
-} from "./common.js?v=6";
+} from "./common.js?v=7";
 
 const $ = (id) => document.getElementById(id);
 let user = null;
@@ -14,13 +14,42 @@ let statusDoc = null;
 let editing = null; // id of the server being edited, or null when adding
 let deleting = null;
 
-// ---- Tabs: My servers / Favourites (need sign-in) and Recent (this browser) ----
-const TABS = ["mine", "favourites", "recent"];
+// ---- Tabs: Listed / Saved / Favourites (need sign-in) and Recent (this browser) ----
+const TABS = ["mine", "saved", "favourites", "recent"];
 const SIGNED_OUT_TEXT = {
+  saved: "Sign in with the same Google account as the PortL app to see and edit your saved servers here.",
   mine: "Own a Minecraft Bedrock server? Sign in to give it a page with an Open in PortL button and a QR code, and list it in Discover.",
   favourites: "Sign in to see the servers you've favourited. Tap ★ Favourite on any server page to add it here.",
 };
 let tab = TABS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "mine";
+
+// "Share to Discover" in the app opens /my/?add=1&name=&host=&port=: open the Add form filled in.
+const addParams = new URLSearchParams(location.search);
+let pendingAdd = addParams.get("add") === "1" ? {
+  name: cleanLine(addParams.get("name")).slice(0, LIMITS.name),
+  host: cleanLine(addParams.get("host")).toLowerCase(),
+  port: Number(addParams.get("port")) || 19132,
+} : null;
+if (pendingAdd) {
+  tab = "mine";
+  SIGNED_OUT_TEXT.mine = `Sign in with Google to put "${pendingAdd.name || pendingAdd.host}" on Discover.`;
+}
+
+function openPendingAdd() {
+  if (!pendingAdd) return;
+  const p = pendingAdd;
+  pendingAdd = null;
+  history.replaceState(null, "", location.pathname);
+  // Already listed? Edit that one instead of adding a duplicate.
+  const existing = servers.find((s) => s.host === p.host && s.port === p.port);
+  openEditor(existing || null);
+  if (!existing) {
+    $("f-name").value = p.name;
+    $("f-host").value = p.host;
+    $("f-port").value = p.port;
+  }
+  setVisibility("public");
+}
 
 for (const b of document.querySelectorAll(".tabs button")) {
   b.addEventListener("click", () => {
@@ -39,6 +68,7 @@ function renderView() {
   $("sign-out").classList.toggle("hidden", !user);
   $("who").classList.toggle("hidden", !user);
   if (tab === "favourites" && user) loadFavourites();
+  if (tab === "saved" && user) renderSaved();
   if (tab === "recent") renderRecent();
 }
 
@@ -103,6 +133,95 @@ async function renderRecent() {
 }
 $("clear-recent").addEventListener("click", () => { clearRecent(); renderRecent(); });
 
+// ---- Saved: the app's server list, synced both ways (users/<uid>/saved) ----
+// Same format as CloudSync.kt: newest updatedAt wins; deleting writes a tombstone.
+let saved = null; // null until the first snapshot
+let unwatchSaved = null;
+let editingSaved = null;
+
+function watchSaved() {
+  if (unwatchSaved) unwatchSaved();
+  unwatchSaved = null;
+  saved = null;
+  if (!user) return;
+  unwatchSaved = onSnapshot(collection(db, "users", user.uid, "saved"), (snap) => {
+    saved = snap.docs.map((d) => ({ id: d.id, ...d.data() })).filter((s) => !s.deleted);
+    if (tab === "saved") renderSaved();
+  }, (e) => {
+    console.error(e);
+    $("saved-status").textContent = friendlyError(e);
+  });
+}
+
+function renderSaved() {
+  if (!saved) { $("saved-status").textContent = "Loading…"; return; }
+  const list = [...saved].sort((a, b) => (b.favourite === true) - (a.favourite === true) || a.name.localeCompare(b.name));
+  $("saved-status").textContent = list.length ? "" : "No saved servers yet. Add one here or in the PortL app.";
+  $("saved-cards").replaceChildren(...list.map((s) => el("div", { class: "card" },
+    el("div", { class: "top" },
+      el("h3", { text: `${s.favourite ? "\u2605 " : ""}${s.name}` }),
+      el("button", { class: "button small", type: "button", text: s.favourite ? "Unstar" : "\u2606 Star",
+        onclick: () => writeSaved(s.id, { ...pick(s), favourite: !s.favourite }) })),
+    el("div", { class: "addr", text: `${s.host}:${s.port}` }),
+    el("div", { class: "actions" },
+      el("a", { class: "button small green", href: appLink(s), text: "Open in PortL" }),
+      el("button", { class: "button small", type: "button", text: "Put on Discover", onclick: () => {
+        pendingAdd = { name: s.name.slice(0, LIMITS.name), host: s.host.toLowerCase(), port: s.port };
+        tab = "mine";
+        renderView();
+        openPendingAdd();
+      } }),
+      el("button", { class: "button small", type: "button", text: "Edit", onclick: () => openSaved(s) }),
+      el("button", { class: "button small red", type: "button", text: "Delete", onclick: () => {
+        if (confirm(`Delete "${s.name}"? It will also be removed from the PortL app.`)) {
+          setDoc(doc(db, "users", user.uid, "saved", s.id), { deleted: true, updatedAt: Date.now() })
+            .catch((e) => { console.error(e); alert(friendlyError(e)); });
+        }
+      } })),
+  )));
+}
+
+const pick = (s) => ({ name: s.name, host: s.host, port: s.port, favourite: !!s.favourite });
+
+function writeSaved(id, data) {
+  return setDoc(doc(db, "users", user.uid, "saved", id), { ...data, updatedAt: Date.now() });
+}
+
+function openSaved(s) {
+  editingSaved = s ? s.id : null;
+  $("saved-title").textContent = s ? "Edit server" : "Add server";
+  $("s-name").value = s ? s.name : "";
+  $("s-host").value = s ? s.host : "";
+  $("s-port").value = s ? s.port : 19132;
+  $("saved-error").classList.add("hidden");
+  $("saved-save").disabled = false;
+  $("saved-dialog").showModal();
+}
+$("saved-add").addEventListener("click", () => openSaved(null));
+$("saved-cancel").addEventListener("click", () => $("saved-dialog").close());
+$("saved-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = cleanLine($("s-name").value).slice(0, 100);
+  const host = cleanLine($("s-host").value);
+  const port = Number($("s-port").value);
+  const err = $("saved-error");
+  const problem = !name ? "Give the server a name."
+    : !isValidHost(host) ? "Address can only use letters, numbers, dots and dashes."
+    : !(Number.isInteger(port) && port >= 1 && port <= 65535) ? "Port must be a number from 1 to 65535." : null;
+  if (problem) { err.textContent = problem; err.classList.remove("hidden"); return; }
+  $("saved-save").disabled = true;
+  try {
+    const old = saved.find((s) => s.id === editingSaved);
+    await writeSaved(editingSaved || crypto.randomUUID(), { name, host, port, favourite: !!(old && old.favourite) });
+    $("saved-dialog").close();
+  } catch (ex) {
+    console.error(ex);
+    err.textContent = friendlyError(ex);
+    err.classList.remove("hidden");
+    $("saved-save").disabled = false;
+  }
+});
+
 // ---- Sign in / out ----
 $("sign-in").addEventListener("click", async () => {
   $("sign-in-error").classList.add("hidden");
@@ -119,6 +238,7 @@ $("sign-out").addEventListener("click", () => signOutUser());
 onUser((u) => {
   user = u;
   servers = [];
+  watchSaved();
   $("loading").classList.add("hidden");
   $("page").classList.remove("hidden");
   if (user) {
@@ -139,6 +259,7 @@ async function loadServers() {
     servers = snap.docs.map((d) => ({ id: d.id, ...d.data() }))
       .sort((a, b) => a.name.localeCompare(b.name));
     await renderList();
+    openPendingAdd();
   } catch (e) {
     console.error(e);
     $("list-status").textContent = friendlyError(e);

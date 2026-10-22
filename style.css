@@ -369,3 +369,6 @@ header.site nav a { white-space: nowrap; }
 .sortbar .tag b { margin-left: 4px; }
 /* Clouds drift in front of the sun/moon but behind the page content (z-index 1). */
 #clouds { position: fixed; z-index: 0; pointer-events: none; }
+@media (max-width: 480px) {
+  .tabs button { font-size: 11px; padding: 10px 2px; }
+}

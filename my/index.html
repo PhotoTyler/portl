@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Servers - PortL</title>
   <meta name="description" content="List your Minecraft Bedrock server so console players can join it with PortL.">
-  <link rel="stylesheet" href="/style.css?v=6">
+  <link rel="stylesheet" href="/style.css?v=7">
 </head>
 <body>
   <header class="site">
@@ -23,7 +23,8 @@
     <p class="muted hidden" id="who"></p>
 
     <div class="tabs" role="tablist">
-      <button type="button" role="tab" data-tab="mine" aria-selected="true">My servers</button>
+      <button type="button" role="tab" data-tab="mine" aria-selected="true">Listed</button>
+      <button type="button" role="tab" data-tab="saved" aria-selected="false">Saved</button>
       <button type="button" role="tab" data-tab="favourites" aria-selected="false">Favourites</button>
       <button type="button" role="tab" data-tab="recent" aria-selected="false">Recent</button>
     </div>
@@ -40,6 +41,13 @@
       <button class="button green" type="button" id="add">Add server</button>
       <p class="muted" id="list-status"></p>
       <div class="cards" id="cards"></div>
+    </section>
+
+    <section class="hidden" id="tab-saved">
+      <p class="muted">Your server list in the PortL app. Sign in to PortL with the same Google account and it stays in sync both ways.</p>
+      <button class="button green" type="button" id="saved-add">Add server</button>
+      <p class="muted" id="saved-status"></p>
+      <div class="cards" id="saved-cards"></div>
     </section>
 
     <section class="hidden" id="tab-favourites">
@@ -82,6 +90,23 @@
     </form>
   </dialog>
 
+  <dialog id="saved-dialog">
+    <form id="saved-form" novalidate>
+      <h2 id="saved-title">Add server</h2>
+      <label for="s-name">Name</label>
+      <input type="text" id="s-name" maxlength="100" autocomplete="off" required>
+      <label for="s-host">Bedrock address</label>
+      <input type="text" id="s-host" maxlength="253" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="play.example.com" required>
+      <label for="s-port">Port</label>
+      <input type="number" id="s-port" min="1" max="65535" value="19132" required>
+      <p class="error hidden" id="saved-error"></p>
+      <div class="row">
+        <button class="button" type="button" id="saved-cancel">Cancel</button>
+        <button class="button green" type="submit" id="saved-save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="delete-dialog">
     <h2>Delete server?</h2>
     <p>Are you sure you want to delete <b id="delete-name"></b>? Its page and QR code will stop working.</p>
@@ -94,6 +119,6 @@
 
   <footer class="site"><p>Not affiliated with Mojang or Microsoft.</p></footer>
 
-  <script type="module" src="/js/my.js?v=6"></script>
+  <script type="module" src="/js/my.js?v=7"></script>
 </body>
 </html>

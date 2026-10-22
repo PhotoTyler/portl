@@ -1,8 +1,8 @@
 import { collection, doc, getDoc, getDocs, limit, query, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-import { db } from "./firebase.js?v=6";
+import { db } from "./firebase.js?v=7";
 import {
   STATES, TAGS, checkedAgo, el, friendlyError, playersText, statusBadge, statusKey, statusOf, tagChip,
-} from "./common.js?v=6";
+} from "./common.js?v=7";
 
 const search = document.getElementById("search");
 const tagBox = document.getElementById("tag-filters");
